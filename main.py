@@ -60,9 +60,9 @@ for scenes in scene_list:
             # Calculate IoU
             iou = intersection_area / union_area if union_area > 0 else 0
             iou_array = np.append(iou_array, iou)
-            print('Iou Array', iou_array)
+            #print('Iou Array', iou_array)
         ind = np.argmax(iou_array)
-        print('Max IOU: ',iou_array[ind])
+        #print('Max IOU: ',iou_array[ind])
         if iou_array[ind] > 0.5:
             x_new = np.append(x_new, x_main[ind])
             y_new = np.append(y_new, y_main[ind])
@@ -75,6 +75,9 @@ for scenes in scene_list:
             h_new = np.append(h_new, 0.0)
             
     print('new x coord: ', x_new)
+    print('new y coord: ', y_new)
+    print('new w coord: ', w_new)
+    print('new h coord: ', h_new)
     
     #plotfig(img, x_new, y_new, w_new, h_new, 'red')
     
@@ -96,12 +99,20 @@ for scenes in scene_list:
     x_dist = x_new+w_new/2
     y_dist = y_new+h_new
     
+    print('x dist new',x_dist)
+    print('y dist new',y_dist)
+    
     obj_image = np.array([[x_dist[i], y_dist[i], 1] for i in range(len(x_dist))])
     pred_dist = np.array([])
     
     for i in range(len(x_dist)):
+        if x_dist[i] == 0:
+            obj_image[i,:][0] = 0
+            obj_image[i,:][1] = 0
+            obj_image[i,:][2] = 0
+            continue
         obj_image[i,:] = np.dot(np.linalg.inv(calib), obj_image[i,:])  # Apply intrinsic camera matrix
-        if obj_image[i,:][1] == 0.0:
+        if obj_image[i,:][1] == 0:
             c = 0
         else:
             c = 1.65/obj_image[i,:][1]
