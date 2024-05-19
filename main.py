@@ -41,5 +41,10 @@ for scenes in scene_list:
     
     for i in range(len(x_dist)):
         obj_image[i,:] = np.dot(np.linalg.inv(calib), obj_image[i,:])  # Apply intrinsic camera matrix
+        c = 1.65/obj_image[i,:][1]
+        
+        obj_image[i,:][0] = obj_image[i,:][0]*c
+        obj_image[i,:][1] = obj_image[i,:][1]*c
+        obj_image[i,:][2] = obj_image[i,:][2]*c
         
     print(obj_image)
