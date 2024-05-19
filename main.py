@@ -3,6 +3,7 @@ from ultralytics import YOLO
 import matplotlib.pyplot as plt
 from matplotlib import patches
 import cv2
+from shapely.geometry import Polygon
 
 def plotfig(img, x_main, y_main, w, h, color):
     plt.figure(figsize=(9,9))
@@ -36,6 +37,34 @@ for scenes in scene_list:
     h = bb_result[:,3]
     
     plotfig(img, x_main, y_main, w, h, 'red')
+    
+    x_new = np.array([])
+    y_new = np.array([])
+    w_new = np.array([])
+    h_new = np.array([])
+    
+    print(labels[:,0])
+    print(x_main)
+    
+    for j in range(len(labels[:,0])):
+        rect1_coords = [(labels[:,0][j], labels[:,1][j]), (labels[:,2][j], labels[:,1][j]), (labels[:,2][j], labels[:,3][j]), (labels[:,0][j], labels[:,3][j])]
+        for a in range(len(x_main)):
+            rect2_coords = [(x_main[a], y_main[a]), (x_main[a]+w[a], y_main[a]), (x_main[a]+w[a], y_main[a]+h[a]), (x_main[a], y_main[a]+h[a])]
+            rect1 = Polygon(rect1_coords)
+            rect2 = Polygon(rect2_coords)
+            # Calculate intersection area
+            intersection_area = rect1.intersection(rect2).area
+            # Calculate union area
+            union_area = rect1.union(rect2).area
+            # Calculate IoU
+            iou = intersection_area / union_area if union_area > 0 else 0
+            if iou > 0.5:
+                x_new = np.append(x_new, x_main[a])
+                y_new = np.append(y_new, y_main[a])
+                w_new = np.append(w_new, w[a])
+                h_new = np.append(h_new, h[a])
+    
+    plotfig(img, x_new, y_new, w_new, h_new, 'red')
     
     x_dist = bb_result[:,0]
     y_dist = bb_result[:,1]+bb_result[:,3]/2
