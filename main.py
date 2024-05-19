@@ -4,18 +4,19 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 import cv2
 
-root = "KITTI_Selection"
+root = "ComputerVision/Object-Detection-and-Depth-Estimation/KITTI_Selection"
 
 scene_list = [6037,6042,6048,6054,6059,6067,6097,6098,6121,6130,6206,6211,6227,6253,6291,6310,6312,6315,6329,6374]
 
 for scenes in scene_list:
     img = cv2.imread(f"{root}/images/{scenes:06d}.png")
+    calib = np.loadtxt(f"{root}/calib/{scenes:06d}.txt")
     # Load a model
     model = YOLO('yolov8x.pt')  # load an official model
     #model = YOLO('path/to/best.pt')  # load a custom model
     
     # Predict with the model
-    results = model(img, classes= [1,2,3,5,7])  # predict on an image
+    results = model(img, classes= [2])  # predict on an image
     bb_result = results[0].boxes.xywh.cpu().numpy().astype(int)
 
     x_main = bb_result[:,0]-bb_result[:,2]/2
@@ -31,3 +32,14 @@ for scenes in scene_list:
     plt.axis("off")
     plt.title(f'Scene ID: {scenes:06d}')
     plt.show()
+    
+    x_dist = bb_result[:,0]
+    y_dist = bb_result[:,1]+bb_result[:,3]/2
+    
+    obj_image = np.array([[x_dist[i], y_dist[i], 1] for i in range(len(x_dist))])
+    pred_dist = np.array([])
+    
+    for i in range(len(x_dist)):
+        obj_image[i,:] = np.dot(np.linalg.inv(calib), obj_image[i,:])  # Apply intrinsic camera matrix
+        
+    print(obj_image)
