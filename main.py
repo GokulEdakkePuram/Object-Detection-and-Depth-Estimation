@@ -81,20 +81,7 @@ for scenes in scene_list:
     
     #plotfig(img, x_new, y_new, w_new, h_new, 'red')
     
-    plt.figure(figsize=(9,9))
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    for bb in range(len(labels[:,0])):
-        rectangle = patches.Rectangle((labels[:,0][bb],labels[:,1][bb]), (labels[:,2]-labels[:,0])[bb], (labels[:,3]-labels[:,1])[bb], fill=False, edgecolor='green')
-        
-        #rectangle2 = patches.Rectangle((x_new[bb],y_new[bb]), w_new[bb], h_new[bb], fill=False, edgecolor='red')
-        plt.gca().add_patch(rectangle)
-    for bbx in range(len(x_new)):
-        rectangle2 = patches.Rectangle((x_new[bbx],y_new[bbx]), w_new[bbx], h_new[bbx], fill=False, edgecolor='red')
-        plt.gca().add_patch(rectangle2)
-    plt.scatter((x_new+w_new/2),(y_new+h_new), s=10, c='yellow')
-    plt.axis("off")
-    plt.title(f'Scene ID: {scenes:06d}')
-    plt.show()
+    
     
     x_dist = x_new+w_new/2
     y_dist = y_new+h_new
@@ -130,4 +117,20 @@ for scenes in scene_list:
     gt_dist = np.array(labels[:,4])
     print('GroundTruth Distance: ', gt_dist)
     
+    plt.figure(figsize=(9,9))
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    for bb in range(len(labels[:,0])):
+        rectangle = patches.Rectangle((labels[:,0][bb],labels[:,1][bb]), (labels[:,2]-labels[:,0])[bb], (labels[:,3]-labels[:,1])[bb], fill=False, edgecolor='green')
+        
+        #rectangle2 = patches.Rectangle((x_new[bb],y_new[bb]), w_new[bb], h_new[bb], fill=False, edgecolor='red')
+        plt.gca().add_patch(rectangle)
+    for bbx in range(len(x_new)):
+        rectangle2 = patches.Rectangle((x_new[bbx],y_new[bbx]), w_new[bbx], h_new[bbx], fill=False, edgecolor='red')
+        plt.text(x_new[bbx],y_new[bbx],f'{gt_dist[bbx]:.2f} {pred_dist[bbx]:.2f}', backgroundcolor='black', color='white', fontsize='xx-small')
+        plt.gca().add_patch(rectangle2)
+    plt.scatter((x_new+w_new/2),(y_new+h_new), s=10, c='yellow')
+    
+    plt.axis("off")
+    plt.title(f'Scene ID: {scenes:06d}')
+    plt.show()
     #plotfig(img, labels[:,0],labels[:,1],(labels[:,2]-labels[:,0]),(labels[:,3]-labels[:,1]), 'green')
