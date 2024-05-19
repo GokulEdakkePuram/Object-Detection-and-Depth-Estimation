@@ -36,18 +36,19 @@ for scenes in scene_list:
     w = bb_result[:,2]
     h = bb_result[:,3]
     
-    plotfig(img, x_main, y_main, w, h, 'red')
+    #plotfig(img, x_main, y_main, w, h, 'red')
     
     x_new = np.array([])
     y_new = np.array([])
     w_new = np.array([])
     h_new = np.array([])
     
-    print(labels[:,0])
-    print(x_main)
+    #print(labels[:,0])
+    #print(x_main)
     
     for j in range(len(labels[:,0])):
         rect1_coords = [(labels[:,0][j], labels[:,1][j]), (labels[:,2][j], labels[:,1][j]), (labels[:,2][j], labels[:,3][j]), (labels[:,0][j], labels[:,3][j])]
+        iou_array = np.array([])
         for a in range(len(x_main)):
             rect2_coords = [(x_main[a], y_main[a]), (x_main[a]+w[a], y_main[a]), (x_main[a]+w[a], y_main[a]+h[a]), (x_main[a], y_main[a]+h[a])]
             rect1 = Polygon(rect1_coords)
@@ -58,16 +59,22 @@ for scenes in scene_list:
             union_area = rect1.union(rect2).area
             # Calculate IoU
             iou = intersection_area / union_area if union_area > 0 else 0
-            if iou > 0.5:
-                x_new = np.append(x_new, x_main[a])
-                y_new = np.append(y_new, y_main[a])
-                w_new = np.append(w_new, w[a])
-                h_new = np.append(h_new, h[a])
-            else:
-                x_new = np.append(x_new, 0.0)
-                y_new = np.append(y_new, 0.0)
-                w_new = np.append(w_new, 0.0)
-                h_new = np.append(h_new, 0.0)
+            iou_array = np.append(iou_array, iou)
+            print('Iou Array', iou_array)
+        ind = np.argmax(iou_array)
+        print('Max IOU: ',iou_array[ind])
+        if iou_array[ind] > 0.5:
+            x_new = np.append(x_new, x_main[ind])
+            y_new = np.append(y_new, y_main[ind])
+            w_new = np.append(w_new, w[ind])
+            h_new = np.append(h_new, h[ind])
+        else:
+            x_new = np.append(x_new, 0.0)
+            y_new = np.append(y_new, 0.0)
+            w_new = np.append(w_new, 0.0)
+            h_new = np.append(h_new, 0.0)
+            
+    print('new x coord: ', x_new)
     
     #plotfig(img, x_new, y_new, w_new, h_new, 'red')
     
@@ -106,6 +113,6 @@ for scenes in scene_list:
         pred_dist = np.append(pred_dist, np.sqrt(np.sum(np.square((obj_image[i,:][0],obj_image[i,:][1],obj_image[i,:][2])))))
         
     print(obj_image)
-    print(pred_dist)
+    print('Predicted Distance: ', pred_dist)
     
-    plotfig(img, labels[:,0],labels[:,1],(labels[:,2]-labels[:,0]),(labels[:,3]-labels[:,1]), 'green')
+    #plotfig(img, labels[:,0],labels[:,1],(labels[:,2]-labels[:,0]),(labels[:,3]-labels[:,1]), 'green')
