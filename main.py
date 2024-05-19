@@ -11,13 +11,13 @@ def plotfig(img, x_main, y_main, w, h, color):
     for bb in range(len(x_main)):
         rectangle = patches.Rectangle((x_main[bb],y_main[bb]), w[bb], h[bb], fill=False, edgecolor=color)
         plt.gca().add_patch(rectangle)
-    plt.axis("off")
+    plt.axis()
     plt.title(f'Scene ID: {scenes:06d}')
     plt.show()
 
 root = "ComputerVision/Object-Detection-and-Depth-Estimation/KITTI_Selection"
 
-scene_list = [6037,6042,6048,6054,6059,6067,6097,6098,6121,6130,6206,6211,6227,6253,6291,6310,6312,6315,6329,6374]
+scene_list = [6037,6042,6048,6054,6059,6067,6097,6098,6121,6130,6211,6227,6253,6291,6310,6312,6315,6329,6374]#6206 excluded
 
 for scenes in scene_list:
     img = cv2.imread(f"{root}/images/{scenes:06d}.png")
@@ -28,7 +28,7 @@ for scenes in scene_list:
     #model = YOLO('path/to/best.pt')  # load a custom model
     
     # Predict with the model
-    results = model(img, classes= [2])  # predict on an image
+    results = model(img, classes= [2,3,5,7])  # predict on an image
     bb_result = results[0].boxes.xywh.cpu().numpy().astype(int)
 
     x_main = bb_result[:,0]-bb_result[:,2]/2
@@ -63,6 +63,11 @@ for scenes in scene_list:
                 y_new = np.append(y_new, y_main[a])
                 w_new = np.append(w_new, w[a])
                 h_new = np.append(h_new, h[a])
+            else:
+                x_new = np.append(x_new, 0.0)
+                y_new = np.append(y_new, 0.0)
+                w_new = np.append(w_new, 0.0)
+                h_new = np.append(h_new, 0.0)
     
     #plotfig(img, x_new, y_new, w_new, h_new, 'red')
     
@@ -76,19 +81,23 @@ for scenes in scene_list:
     for bbx in range(len(x_new)):
         rectangle2 = patches.Rectangle((x_new[bbx],y_new[bbx]), w_new[bbx], h_new[bbx], fill=False, edgecolor='red')
         plt.gca().add_patch(rectangle2)
+    plt.scatter((x_new+w_new/2),(y_new+h_new), s=10, c='yellow')
     plt.axis("off")
     plt.title(f'Scene ID: {scenes:06d}')
     plt.show()
     
-    x_dist = bb_result[:,0]
-    y_dist = bb_result[:,1]+bb_result[:,3]/2
+    x_dist = x_new+w_new/2
+    y_dist = y_new+h_new
     
     obj_image = np.array([[x_dist[i], y_dist[i], 1] for i in range(len(x_dist))])
     pred_dist = np.array([])
     
     for i in range(len(x_dist)):
         obj_image[i,:] = np.dot(np.linalg.inv(calib), obj_image[i,:])  # Apply intrinsic camera matrix
-        c = 1.65/obj_image[i,:][1]
+        if obj_image[i,:][1] == 0.0:
+            c = 0
+        else:
+            c = 1.65/obj_image[i,:][1]
         
         obj_image[i,:][0] = obj_image[i,:][0]*c
         obj_image[i,:][1] = obj_image[i,:][1]*c
