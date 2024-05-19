@@ -110,6 +110,7 @@ for scenes in scene_list:
             obj_image[i,:][0] = 0
             obj_image[i,:][1] = 0
             obj_image[i,:][2] = 0
+            pred_dist = np.append(pred_dist, np.sqrt(np.sum(np.square((obj_image[i,:][0],obj_image[i,:][1],obj_image[i,:][2])))))
             continue
         obj_image[i,:] = np.dot(np.linalg.inv(calib), obj_image[i,:])  # Apply intrinsic camera matrix
         if obj_image[i,:][1] == 0:
@@ -125,5 +126,8 @@ for scenes in scene_list:
         
     print(obj_image)
     print('Predicted Distance: ', pred_dist)
+    
+    gt_dist = np.array(labels[:,4])
+    print('GroundTruth Distance: ', gt_dist)
     
     #plotfig(img, labels[:,0],labels[:,1],(labels[:,2]-labels[:,0]),(labels[:,3]-labels[:,1]), 'green')
