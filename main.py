@@ -47,4 +47,7 @@ for scenes in scene_list:
         obj_image[i,:][1] = obj_image[i,:][1]*c
         obj_image[i,:][2] = obj_image[i,:][2]*c
         
+        pred_dist = np.append(pred_dist, np.sqrt(np.sum(np.square((obj_image[i,:][0],obj_image[i,:][1],obj_image[i,:][2])))))
+        
     print(obj_image)
+    print(pred_dist)
