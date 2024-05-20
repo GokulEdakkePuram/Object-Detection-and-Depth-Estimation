@@ -19,6 +19,9 @@ root = "ComputerVision/Object-Detection-and-Depth-Estimation/KITTI_Selection"
 
 scene_list = [6037,6042,6048,6054,6059,6067,6097,6098,6121,6130,6211,6227,6253,6291,6310,6312,6315,6329,6374]#6206 excluded
 
+gt_total = np.array([])
+pred_total = np.array([])
+
 for scenes in scene_list:
     img = cv2.imread(f"{root}/images/{scenes:06d}.png")
     calib = np.loadtxt(f"{root}/calib/{scenes:06d}.txt")
@@ -63,7 +66,7 @@ for scenes in scene_list:
             #print('Iou Array', iou_array)
         ind = np.argmax(iou_array)
         #print('Max IOU: ',iou_array[ind])
-        if iou_array[ind] > 0.5:
+        if iou_array[ind] > 0.3:
             x_new = np.append(x_new, x_main[ind])
             y_new = np.append(y_new, y_main[ind])
             w_new = np.append(w_new, w[ind])
@@ -134,3 +137,18 @@ for scenes in scene_list:
     plt.title(f'Scene ID: {scenes:06d}')
     plt.show()
     #plotfig(img, labels[:,0],labels[:,1],(labels[:,2]-labels[:,0]),(labels[:,3]-labels[:,1]), 'green')
+    gt_total = np.append(gt_total, gt_dist)
+    pred_total = np.append(pred_total, pred_dist)
+
+print('GT Total: ', gt_total)
+print('YOLO Total: ', pred_total)
+
+plt.plot(h, h)
+plt.scatter(pred_total, gt_total, s=15)
+plt.title('Plot')
+plt.xlabel('Distancce from Camera')
+plt.ylabel('Distance from Ground Truth')
+plt.grid(True)
+plt.xlim(0, 100)
+plt.ylim(0, 100)
+plt.show()
